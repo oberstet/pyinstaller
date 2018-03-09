@@ -19,9 +19,12 @@
 #
 # Tested with   Twisted 12.3.0
 
-
-from twisted.internet import default
-
+import sys
 
 # This creates module: sys.modules['twisted.internet.reactor']
-default.install()
+if sys.platform in ['win32']:
+    from twisted.internet.iocpreactor import reactor as _iocpreactor
+    _iocpreactor.install()
+else:
+    from twisted.internet import default
+    default.install()

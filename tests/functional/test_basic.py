@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2005-2017, PyInstaller Development Team.
+# Copyright (c) 2005-2018, PyInstaller Development Team.
 #
 # Distributed under the terms of the GNU General Public License with exception
 # for distributing bootloader.
@@ -50,7 +50,7 @@ def test_pyz_as_external_file(pyi_builder, monkeypatch):
     if pyi_builder._mode == 'onefile':
         pytest.skip('only --onedir')
 
-    import PyInstaller
+    import PyInstaller.building.build_main
     EXE = PyInstaller.building.build_main.EXE
     monkeypatch.setattr('PyInstaller.building.build_main.EXE', MyEXE)
 
@@ -262,7 +262,7 @@ def test_option_verbose(pyi_builder, monkeypatch):
         args.append([('v', None, 'OPTION')])
         return EXE(*args, **kwargs)
 
-    import PyInstaller
+    import PyInstaller.building.build_main
     EXE = PyInstaller.building.build_main.EXE
     monkeypatch.setattr('PyInstaller.building.build_main.EXE', MyEXE)
 
@@ -282,7 +282,8 @@ def test_option_w_unset(pyi_builder):
         assert 'ignore' not in sys.warnoptions
         """)
 
-def test_option_w_ignore(pyi_builder, monkeypatch):
+
+def test_option_w_ignore(pyi_builder, monkeypatch, capsys):
     "Test to ensure that option W can be set."
 
     def MyEXE(*args, **kwargs):
@@ -290,7 +291,7 @@ def test_option_w_ignore(pyi_builder, monkeypatch):
         args.append([('W ignore', '', 'OPTION')])
         return EXE(*args, **kwargs)
 
-    import PyInstaller
+    import PyInstaller.building.build_main
     EXE = PyInstaller.building.build_main.EXE
     monkeypatch.setattr('PyInstaller.building.build_main.EXE', MyEXE)
 
@@ -300,6 +301,8 @@ def test_option_w_ignore(pyi_builder, monkeypatch):
         assert 'ignore' in sys.warnoptions
         """)
 
+    _, err = capsys.readouterr()
+    assert "'import warnings' failed" not in err
 
 @skipif_win
 def test_python_makefile(pyi_builder):

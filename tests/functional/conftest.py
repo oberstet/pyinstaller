@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# Copyright (c) 2005-2017, PyInstaller Development Team.
+# Copyright (c) 2005-2018, PyInstaller Development Team.
 #
 # Distributed under the terms of the GNU General Public License with exception
 # for distributing bootloader.
@@ -31,6 +31,15 @@ import shutil
 # -------------------
 import py
 import psutil # Manages subprocess timeout.
+
+
+# Set a handler for the root-logger to inhibit 'basicConfig()' (called in
+# PyInstaller.log) is setting up a stream handler writing to stderr. This
+# avoids log messages to be written (and captured) twice: once on stderr and
+# once by pytests's caplog.
+import logging
+logging.getLogger().addHandler(logging.NullHandler())
+
 
 # Local imports
 # -------------
@@ -382,8 +391,12 @@ class AppBuilder(object):
                     p.kill()
             stdout, stderr = process.communicate()
 
-        sys.stdout.write(stdout)
-        sys.stderr.write(stderr)
+        if is_py2:
+            sys.stdout.write(stdout)
+            sys.stderr.write(stderr)
+        else:
+            sys.stdout.buffer.write(stdout)
+            sys.stderr.buffer.write(stderr)
 
         return retcode
 
